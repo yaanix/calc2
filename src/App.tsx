@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, Copy, CheckCircle } from 'lucide-react';
 
 function App() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset time portion to midnight
-  
-  const [selectedDate, setSelectedDate] = useState(today);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [resultDate, setResultDate] = useState<Date | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -16,22 +13,24 @@ function App() {
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = new Date(e.target.value);
-    date.setHours(0, 0, 0, 0); // Reset time portion to midnight
-    setSelectedDate(date);
-    setResultDate(null);
+    const newDate = new Date(e.target.value);
+    if (!isNaN(newDate.getTime())) {
+      setSelectedDate(newDate);
+      setResultDate(null);
+    }
   };
 
   const copyResult = () => {
     if (resultDate) {
-      navigator.clipboard.writeText(resultDate.toLocaleDateString('ru-RU'));
+      navigator.clipboard.writeText(resultDate.toLocaleDateString('ru-RU', {
+        year: '2-digit',
+        month: '2-digit',
+        day: '2-digit'
+      }));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
-
-  // Ensure we have a valid date string for the input value
-  const dateString = selectedDate.toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] flex items-center justify-center p-4">
@@ -47,7 +46,7 @@ function App() {
           <label className="block text-white mb-2">Выберите дату:</label>
           <input
             type="date"
-            value={dateString}
+            value={selectedDate.toISOString().split('T')[0]}
             onChange={handleDateChange}
             className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -70,7 +69,11 @@ function App() {
             <div>
               <span className="text-white/80">Результат:</span>
               <span className="ml-2 text-white">
-                {resultDate.toLocaleDateString('ru-RU')}
+                {resultDate.toLocaleDateString('ru-RU', {
+                  year: '2-digit',
+                  month: '2-digit',
+                  day: '2-digit'
+                })}
               </span>
             </div>
             <button
